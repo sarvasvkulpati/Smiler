@@ -25,7 +25,7 @@ from utils import crop_and_resize
 import cv2
 
 
-classifier = cv2.CascadeClassifier('/usr/local/Cellar/opencv/2.4.13.2/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml')
+classifier = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
 video_capture = cv2.VideoCapture(0)
 try:
