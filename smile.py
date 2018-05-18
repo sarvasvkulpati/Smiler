@@ -24,6 +24,9 @@ from IPython.display import clear_output
 from utils import crop_and_resize
 import cv2
 
+
+classifier = cv2.CascadeClassifier('/usr/local/Cellar/opencv/2.4.13.2/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml')
+
 video_capture = cv2.VideoCapture(0)
 try:
     while True:
@@ -31,11 +34,24 @@ try:
         cv2.imshow('webcam', frame)
         cv2.waitKey(1)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        data = crop_and_resize(gray, 32, zoom=0.6)
-        data = data[:, :, np.newaxis]
+        faces = classifier.detectMultiScale(gray, 1.3, 5)
 
-        data = data.astype(np.float) / 255.
-        print_indicator(data, model, class_names)
+        for (x,y,w,h) in faces:
+            cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
+
+            detected_face = frame[int(y):int(y+h), int(x):int(x+w)] #crop detected face
+
+            detected_face = cv2.cvtColor(detected_face, cv2.COLOR_BGR2GRAY) #transform to gray scale
+            
+            detected_face = cv2.resize(detected_face, (32, 32))
+            cv2.imshow('face', detected_face)
+
+            data = detected_face[:, :, np.newaxis]
+            data = data.astype(np.float) / 255
+
+            print_indicator(data, model, class_names)
+
+        
         clear_output(wait=True)
 except KeyboardInterrupt:
     pass
