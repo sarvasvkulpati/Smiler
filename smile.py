@@ -1,12 +1,16 @@
 import keras
+import RPi.GPIO as GPIO
 import time
 import line_profiler
 from keras.models import model_from_json
 model = model_from_json(open('model.json').read())
 model.load_weights('weights.h5')
 
-
-
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False) 
+GPIO.setup(16, GPIO.OUT)
+GPIO.setup(20, GPIO.OUT)
+GPIO.setup(21, GPIO.OUT)
 import numpy as np
 
 
@@ -52,7 +56,7 @@ try:
         if len(faces) != 0:
             (x,y,w,h) = faces[0]
                 
-              
+            GPIO.output(16, GPIO.HIGH)  
             cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
                     
             detected_face = frame[int(y):int(y+h), int(x):int(x+w)] #crop detected face
@@ -71,24 +75,33 @@ try:
                 smileStart = time.time()
                 checkingSmile = True
             elif prob > 0.5 and checkingSmile:
+                GPIO.output(20, GPIO.HIGH)
                 elapsed = currentTime - smileStart 
                 print(str(currentTime) + " - " + str(smileStart + interval))
                 print("smiled for " + str(elapsed))
                 if elapsed > interval:
+                    GPIO.output(21, GPIO.HIGH)
                     print("you smiled for 5 seconds")
                     checkingSmile = False
                     smileStart = 0
             else:
                 checkingSmile = False
                 print("not smiling")
-    
+                GPIO.output(20, GPIO.LOW)
+                GPIO.output(21, GPIO.LOW)
             
         else:
             print("no face detected")
+            GPIO.output(16, GPIO.LOW)
+            GPIO.output(20, GPIO.LOW)
+            GPIO.output(21, GPIO.LOW)
 
         
         clear_output(wait=True)
 except KeyboardInterrupt:
+    GPIO.output(16, GPIO.LOW)
+    GPIO.output(20, GPIO.LOW)
+    GPIO.output(21, GPIO.LOW)
     pass
 video_capture.release()
 
