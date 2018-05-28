@@ -35,7 +35,7 @@ from utils import crop_and_resize
 import cv2
 
 
-classifier = cv2.CascadeClassifier('lbpcascade_frontalface.xml')
+classifier = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
 smileStart = 0
 checkingSmile = False
@@ -47,22 +47,28 @@ try:
     while True:
         currentTime = time.time()
         ret, frame = video_capture.read()
-        cv2.imshow('webcam', frame)
-        cv2.waitKey(1)
+        
+            
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        r = 320.0 /gray.shape[1]
+        dim = (320, int(gray.shape[0] * r))
+        resized = cv2 .resize(gray, dim, interpolation = cv2.INTER_AREA)
+        
+        cv2.imshow('webcam', resized)
+        cv2.waitKey(1)
+        
        
-        faces = classifier.detectMultiScale(gray, 1.3, 5)
+        faces = classifier.detectMultiScale(resized, 1.3, 5)
        
         if len(faces) != 0:
             (x,y,w,h) = faces[0]
                 
             GPIO.output(16, GPIO.HIGH)  
-            cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
+            cv2.rectangle(resized,(x,y),(x+w,y+h),(255,0,0),2)
                     
-            detected_face = frame[int(y):int(y+h), int(x):int(x+w)] #crop detected face
+            detected_face = resized[int(y):int(y+h), int(x):int(x+w)] #crop detected face
             
-            detected_face = cv2.cvtColor(detected_face, cv2.COLOR_BGR2GRAY) #transform to gray scale
-           
+            #detected_face = cv2.cvtColor(detected_face, cv2.COLOR_BGR2GRAY)
             detected_face = cv2.resize(detected_face, (32, 32))
             cv2.imshow('face', detected_face)
 
