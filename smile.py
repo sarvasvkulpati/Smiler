@@ -76,15 +76,17 @@ try:
             data = data.astype(np.float) / 255
 
             prob = print_indicator(data, model, class_names)
-            if prob > 0.5 and not checkingSmile:
+            print(prob)
+            if prob > 0.2 and not checkingSmile:
                 print("started smile")
                 smileStart = time.time()
                 checkingSmile = True
-            elif prob > 0.5 and checkingSmile:
+            elif prob > 0.2 and checkingSmile:
                 GPIO.output(20, GPIO.HIGH)
-                elapsed = currentTime - smileStart 
-                print(str(currentTime) + " - " + str(smileStart + interval))
-                print("smiled for " + str(elapsed))
+                elapsed = currentTime - smileStart
+                print("smiling")
+                #print(str(currentTime) + " - " + str(smileStart + interval))
+                #print("smiled for " + str(elapsed))
                 if elapsed > interval:
                     GPIO.output(21, GPIO.HIGH)
                     print("you smiled for 5 seconds")
